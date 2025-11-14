@@ -6,12 +6,16 @@ import { Transactions } from './components/Transactions';
 import { Goals } from './components/Goals';
 import { Subscriptions } from './components/Subscriptions';
 import { Settings } from './components/Settings';
-import { Toaster, toast } from 'sonner@2.0.3';
+import { Toaster, toast } from "sonner";
+import { supabase } from './utils/storage';
 import {
   Transaction,
   Goal,
   Subscription,
   Settings as SettingsType,
+} from "./utils/types";
+
+import {
   getTransactions,
   saveTransactions,
   getGoals,
@@ -20,8 +24,7 @@ import {
   saveSubscriptions,
   getSettings,
   saveSettings,
-} from './utils/storage';
-
+} from "./utils/storage";
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -32,7 +35,12 @@ export default function App() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load data from cloud storage on mount
+  // 🔹 Anonymous login for automatic per-user isolation
+  useEffect(() => {
+    supabase.auth.signInAnonymously();
+  }, []);
+
+  // 🔹 Load data from cloud storage after login
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -42,7 +50,7 @@ export default function App() {
           getSubscriptions(),
           getSettings(),
         ]);
-        
+
         setTransactions(txns);
         setGoals(gls);
         setSubscriptions(subs);
